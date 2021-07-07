@@ -595,3 +595,131 @@ export default class Counter extends Component {
     }
 
 ```
+
+
+
+# Updating the State
+
+In React we DO NOT modify the state directly.
+In otherwords, we don't write code like this.
+>    handleIncrement = () => {
+        this.state.count+=;
+    }
+Technically, the value of the count property is being implemented, but react is not aware of that. That's why it's not updating the view.
+
+
+setState method tells REact that we're updating the state and it will figure out what part of the state has changed  and based on that it will 
+bring the DOM in sync with the Virtual DOM.
+
+Have to Explicitily tell React what is changed.
+Pass an object , and the properties of this object will be merged 
+with what we have in the state object, or it will override the properties if they already exist.
+
+```javascript
+
+export default class Counter extends Component {
+
+    state = {
+        count : 1,
+        tags : ['tag1', 'tag2', 'tag3']
+    }
+
+    handleIncrement = () => {
+        this.setState({
+            count : this.state.count + 1
+        })
+    }
+```
+
+# What Happens when State Changes?
+
+When we click increment button, at this point we're calling 
+this.setState , this method is telling React that this state of this component is going to change.
+
+React will then schedule a call to the render method 
+sometime in the future this method is going to be called, we don't know when.
+
+This is a ASYNCHRONOUS call, which means it's goin gto happen in the future.
+
+At some point in the future render method is going to be called.
+
+The Render method returns a new REACT ELEMENT 
+REact element has two children . span and button
+
+```javascript
+render(){
+    return (
+        <div>
+            <span></span>
+            <button/>
+        </div>
+    )
+}
+```
+
+so our virtual DOM is a tree of three element
+
+React will put this side by sdie and compare them to figure out what elements in a virutal DOM are modified.
+in this case it realizes that our span is modified because that is where we hav e used count property ({this.formatCount() })
+
+![](https://images.velog.io/images/matt85kim53/post/d1b46610-70d7-4bba-a1c4-0492ab687e5e/image.png)
+
+It will reach OUT TO real browser DOM , and update the corresponding
+span so it matches the one we have in the virtual DOM. 
+So nowhere else in the DOM is updated. only that span elment
+
+
+
+# Passing Event Arguments
+
+onClick we need to pass function reference
+1st solution (writing code like this is messy)
+```javascript
+
+    handleIncrement = (product) => {
+
+        console.log(product)
+        this.setState({
+            count : this.state.count + 1
+        })
+    }
+
+    doHandleIncrement = () => {
+        this.handleIncrement({id : 1})
+    }
+
+    render() {
+        return (
+            <div>
+            <span className={this.getBadgeClasses()}>{this.formatCount()}</span>
+            <button onClick={this.doHandleIncrement}  className="btn btn-secondary btn-sm">Increment</button>
+            </div>
+        )
+    }
+
+
+```
+
+2nd solution
+
+- use Inline 
+```javascript
+
+    handleIncrement = (product) => {
+
+        console.log(product)
+        this.setState({
+            count : this.state.count + 1
+        })
+    }
+
+    render() {
+        return (
+            <div>
+            <span className={this.getBadgeClasses()}>{this.formatCount()}</span>
+            <button onClick={() => {this.handleIncrement({id : 1})}}  className="btn btn-secondary btn-sm">Increment</button>
+            </div>
+        )
+    }
+
+```
