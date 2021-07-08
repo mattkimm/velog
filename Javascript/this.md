@@ -42,7 +42,7 @@ new 연산자를 사용하면 `this`는 해당 `object`를 가르키게된다.
 
 
 
-## 2-3. 💡 메소드 (객체 안에 함수)
+## 2-3. 💡 메소드
 
 -`Object` 안에 `function` 이  있으면 `this` 는 **해당 `Object`** 를 참조합니다.
 
@@ -78,8 +78,10 @@ b
 c
 */
 ```
-
 참고 : ECMA 2015 에서 추가된 shorter syntax로 변환했다.
+
+
+
 ```javascript
 const video = {
   	tags : ['a','b','c'],
@@ -91,11 +93,7 @@ const video = {
 
 ```
 
-
-
 > 하지만 각각의 태그 옆에 `title`을 보여주고 싶다면?
-
-
 
 ```javascript
 const video = {
@@ -110,14 +108,6 @@ const video = {
 video.showTags();
   
 ```
-
-
-
-
-
-
-
-
 
 > video.showTags()를 호출하면 this.title 은 **undefined** 값이 나온다.
 
@@ -148,6 +138,7 @@ video.showTags(); // Window{} "a"
 # 3. this 문제 해결하기
 
 
+
 ## 3-1. 💡 forEach 문제 해결하기
 > foEach 는 2가지 파라미터를 받을 수 있다.  (callback & thisArg[optional])
 https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
@@ -163,8 +154,14 @@ const video = {
     }
 }
 
-video.showTags();  //  {firstName : "test"} "a"
-````
+
+video.showTags();  
+/*
+{firstName : "test"} "a"
+{firstName : "test"} "b"
+{firstName : "test"} "c"
+*/
+```
 > 두 번째 인자로 `object` 를 넣으면 **`this`는 forEach 의 두번째 parameter를 참조하게된다.**  
 
 ---
@@ -183,11 +180,13 @@ video.showTags();
 // [TITLE] tag1 
 // [TITLE] tag2
 // [TITLE] tag3
-````
-> forEach 두 번째 인자로 `this`를 가르키면 현재 object (video객체)를 가르키게된다.
+```
+> 그렇기 떄문에 forEach 두 번째 인자로 `this`를 가르키면 현재 object (video객체)를 가르키게된다.
+
 forEach에 두번째로 전달된 `this`는 callback function 에 있는게 아니고 showTags메소드의 실행 컨텍스트에 있다.
 
-##### forEach 처러Javascript의 모든 메소드가 this 인수를 전달할 수있는 것은 아닙니다.
+
+> forEach 처럼 Javascript의 모든 메소드가 this 인수를 전달할 수있는 것은 아닙니다.
 
 
 ## 3-2. this 해결 방법 
@@ -207,7 +206,6 @@ const video = {
 }
 ```
 
-
 ### 3-2-2. 🟢 apply, bind, call
 자바스크립트에서 함수는 객체다
 
@@ -218,13 +216,14 @@ function playVideo(){
 ```
 - Javascript 에서 함수는 객체입니다. (추후 추가할 예정)
 그렇기 때문에 객체 property 및 method 에 접근할 수 있습니다.
+
 `this` 값을 변경하기 위해 3 가지 Methods 사용 할 수 있습니다.
 
 - apply
 - bind 
 - call
 
-## call
+# call
 
 MDN : call() 메소드는 주어진 this 값 및 각각 전달된 인수와 함께 함수를 호출합니다.
 
@@ -234,26 +233,29 @@ function playVideo(){
 }
 
 playVideo();                    // Window
+
 playVideo.call({name : 'Ash'}); // {name : 'Ash`}
 
 
-
-
-
+/* -------------------------------------------- */ 
 const mike = {
     name : "Mike"
 }
+
+
 function update(birthYear, occupation){
 	this.birthYear = birthYear;
   	this.occupation = occupation;
 }
 update.call(mike, 1991, 'singer');
 console.log(mike); 
+
 //{name: "Mike", birthYear: 1991, occupation: "singer"}
 ```
 Strict Mode 에 this 별도로 정리 필요!
 
 ## apply
+
 `apply` 는 함수 매개변수를 처리하는 방법을 제외하면 `call` 과 비슷하다.
 
 `call` 은 일반적인 함수와 마찬가지로 **매개변수를 직접받지만 apply는 매개변수를 배열로 받습니다.**
@@ -271,8 +273,9 @@ playVideo.apply({name : 'Ash'}); // {name : 'Ash}
 //thisArg  : can pass an object and this will refernce that object.
 ```
 
-difference b/t apply and call is only about passing arguments.
 
+> call 과 apply는 동작 방법이 같다.
+ 매개변수를 받는 방법만 다를 뿐이다, Call은 순서대로 이렇게 직접 받고 apply는 배열 형태로 받는다. 
 
 ```javascript
 playVideo.apply({name : 'Ash'}, 1,2); 
@@ -292,51 +295,57 @@ update.apply(mike, [1991, 'singer']);
 console.log(mike); //
 
 
-const nums = [3,1,5,10]
-const minNum = Math.min.apply(null,nums);
-// Math.min.apply(null,[3,1,5,10])
-const minMax = Math.max.call(null, ...nums);
-// Math.max.apply(null, 3, 1, 5,10)
+/**********************/
+function sum (a,b) {
+    return a + b;
+}
+const result = sum.apply(null, [5,10])  // set 'this' to null
+console.log(result); // 15
+
+
+/**********************/
+function sum () {
+    console.log(this);
+    let sum  = 0;
+    for(let i = 0; i < arguments.length ; i ++){
+        sum+=arguments[i];
+    })
+    return sum
+}
+const result = sum.apply({name : 'Test'}, [5,25,1]);
+console.log(result); // {name : 'TEst'} 31
   ```
-call 과 apply는 동작 방법이 같다. 매개변수를 받는 방법만 다를 뿐이다, Call은 순서대로 이렇게 직접 받고 apply는 배열 형태로 받는다. 
 
 
-### bind
-this bind method does not call playVideo function.
-it returns a new function and sets this to point to this object permanately.
-So no matter how we call that function . 
-this will always point to this object that we pass here
+
+# bind
+bind() 메소드가 호출되면 새로운 함수를 생성하고 Object를 가르키도록 'this'를 설정한다.
+
 ```javascript
+function playVideo(){
+	console.log(this);
+}
+
 playVideo.bind({name : 'test'}); 
+
+playVideo.bind({name : 'test'}); 
+
 this returns a new function we can store this result and call that fucntion.
 
+ƒ playVideo(){
+	console.log(this);
+}
+/*-----------------------------------------*/
+
+// 꼭 변수에 안 담아도된다 바로 호출도 가능하다.
 const fn = playVideo.bind({name : 'test'});
 fn();
-
-you dont need to this separate constant
-immediately call the function that is returned from the bind method
-
 playVideo.bind({name :'Mosh'})();
 ```
 
-bind를 사용하면 함수의 this 값을 영구히 변경할 수 있다. bind 는 새로 바인딩한 함수를 만듭니다. 이 함수는 항상 mike 를 this로 받습니다. 
-```javascript
-const mike = {
- name = "Mike"
-}
-function update(birthYear, occupation){
-	this.birthYear = birthYear;
-    this.occupation = occupation;
-}
-const updateMike = update.bind(mike);
-updateMike(1980, 'police')
-console.log(mike);
-```
-
-call, apply , bind we can set the this argument to given function.
 
 
-### call bind method and pass an object  to be used as a value of this
+### bind 메소드를 호출하고이 값으로 사용할 객체를 전달합니다.
 ```javascript
 const video = {
 	title : 'a',
@@ -350,7 +359,8 @@ const video = {
 }
 ```
 
-```
+```javascript
+
 const user = {
 	name : "Mike",
     showName : function() {
@@ -359,16 +369,18 @@ const user = {
  };
  user.showName();
  let fn = user.showName; 
- fn(); //'hello, '
+
+ fn(); //'hello, '    
  
- fn.call(user);
- fn.apply(user);
+ fn.call(user); // hello , Mike
+ fn.apply(user); // hello,  Mike
  
  let boundFn = fn.bind(user);
- boundFn();
+ boundFn(); // hello,  Mike
  
 ```
-fn 에 할당할때 this 값을 잃어버렷다. 
+
+
 ## 3.3 🟢 Arrow Function 사용하기 
 
 화살표 함수는 자체적으로 바인딩하지 않고 대신 "어휘 범위 지정"이라고하는 부모 범위에서 상속합니다. 이로 인해 화살표 기능은 일부 시나리오에서는 훌륭한 선택이지만 다른 시나리오에서는 나쁜 선택입니다.
@@ -394,6 +406,8 @@ let person = {
     name : 'test',
  	town : 'Busan',  
 }
+
+
 let match3 = cities.find(function(item){
 	if(item === this.town) return true;
 }, person);
